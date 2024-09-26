@@ -18,15 +18,19 @@ extends Node2D
 @export_range(0.01, 0.5) var animation_speed = 0.1
 @export_range(-0.1, 0.1) var rotation_speed = 0.0
 
-@export var float_offset = 0
+@export var max_float_offset = 0
 @export_range(0.0, 0.1) var float_speed = 0.0
+@export_range(1, 8) var async_float_count = 1
 
 
 var spectrum
 var min_values = []
 var max_values = []
 var data = []
-var cur_float = 0.0
+var cur_rotation_offset = rotation_offset
+var cur_float_offsets = [0]
+var cur_float_speeds = [float_speed]
+
 
 
 func _ready():
@@ -37,6 +41,9 @@ func _ready():
 	max_values.fill(0.0)
 	data.resize(line_count)
 	data.fill(0.0)
+	cur_rotation_offset = rotation_offset
+	
+	init_float_variables()
 	
 	queue_redraw()
 
@@ -64,7 +71,7 @@ func _process(delta):
 		if data[i] <= 0.0:
 			min_values[i] = lerp(min_values[i], min_line_height, animation_speed)
 	
-	rotation_offset += rotation_speed
+	cur_rotation_offset += rotation_speed
 	adjust_float();
 	
 	queue_redraw()
@@ -74,9 +81,9 @@ func _draw():
 	var circle_segment = TAU / line_count
 
 	for i in range(line_count):
-		var float_async_offset = i % 4 * float_offset / 3.0
+		var float_async_index = i % async_float_count
 		var float_direction = 1 if i % 2 == 0 else -1
-		var cur_radius = inner_radius + (cur_float + float_async_offset) * float_direction
+		var cur_radius = inner_radius + (cur_float_offsets[float_async_index]) * float_direction
 
 		var adjusted_segment = circle_segment * (cur_radius / inner_radius)
 		var gutter = adjusted_segment / gutter_ratio
@@ -90,29 +97,41 @@ func _draw():
 			height = outer_radius - inner_radius
 			if i == 0:
 				color = "#0f0"
+			if rotation_speed == 0:
+				cur_rotation_offset = rotation_offset
 		
 		draw_colored_polygon(
 			[
-				Vector2(cur_radius * cos(circle_segment * i - circle_segment / 2 + gutter + rotation_offset), cur_radius * sin(circle_segment * i - circle_segment / 2 + gutter + rotation_offset)),
-				Vector2(cur_radius * cos(circle_segment * i + circle_segment / 2 - gutter + rotation_offset), cur_radius * sin(circle_segment * i + circle_segment / 2 - gutter + rotation_offset)),
-				Vector2((cur_radius + height) * cos(circle_segment * i + rotation_offset), (cur_radius + height) * sin(circle_segment * i + rotation_offset)),
+				Vector2(cur_radius * cos(circle_segment * i - circle_segment / 2 + gutter + cur_rotation_offset), cur_radius * sin(circle_segment * i - circle_segment / 2 + gutter + cur_rotation_offset)),
+				Vector2(cur_radius * cos(circle_segment * i + circle_segment / 2 - gutter + cur_rotation_offset), cur_radius * sin(circle_segment * i + circle_segment / 2 - gutter + cur_rotation_offset)),
+				Vector2((cur_radius + height) * cos(circle_segment * i + cur_rotation_offset), (cur_radius + height) * sin(circle_segment * i + cur_rotation_offset)),
 			],
 			color,
 		)
 		
 		draw_colored_polygon(
 			[
-				Vector2(cur_radius * cos(circle_segment * i - circle_segment / 2 + gutter + rotation_offset), cur_radius * sin(circle_segment * i - circle_segment / 2 + gutter + rotation_offset)),
-				Vector2(cur_radius * cos(circle_segment * i + circle_segment / 2 - gutter + rotation_offset), cur_radius * sin(circle_segment * i + circle_segment / 2 - gutter + rotation_offset)),
-				Vector2((cur_radius - (height / 2)) * cos(circle_segment * i + rotation_offset), (cur_radius - (height / 2)) * sin(circle_segment * i + + rotation_offset)),
+				Vector2(cur_radius * cos(circle_segment * i - circle_segment / 2 + gutter + cur_rotation_offset), cur_radius * sin(circle_segment * i - circle_segment / 2 + gutter + cur_rotation_offset)),
+				Vector2(cur_radius * cos(circle_segment * i + circle_segment / 2 - gutter + cur_rotation_offset), cur_radius * sin(circle_segment * i + circle_segment / 2 - gutter + cur_rotation_offset)),
+				Vector2((cur_radius - (height / 2)) * cos(circle_segment * i + cur_rotation_offset), (cur_radius - (height / 2)) * sin(circle_segment * i + + cur_rotation_offset)),
 			],
 			color,
 		)
-	
-		
+
+
 func adjust_float(): 
-	if (abs(cur_float) == float_offset):
-		float_speed = - float_speed
-	cur_float += float_speed
-	if (abs(cur_float) > float_offset):
-		cur_float = sign(cur_float) * float_offset
+	for i in cur_float_offsets.size():
+		if (abs(cur_float_offsets[i]) == max_float_offset):
+			cur_float_speeds[i] = - cur_float_speeds[i]
+		cur_float_offsets[i] += cur_float_speeds[i]
+		if (abs(cur_float_offsets[i]) > max_float_offset):
+			cur_float_offsets[i] = sign(cur_float_offsets[i]) * max_float_offset 
+
+
+func init_float_variables():
+	cur_float_offsets.resize(async_float_count)
+	cur_float_speeds.resize(async_float_count)
+	
+	cur_float_offsets.fill(0)
+	for n in async_float_count:
+		cur_float_speeds[n] = float_speed / (n + 2.0) + float_speed / 2
