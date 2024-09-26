@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://d25xmgletqjew"]
 
 [ext_resource type="Script" path="res://visualizer.gd" id="1_6vqja"]
-[ext_resource type="AudioStream" uid="uid://cwt7yne7s51t7" path="res://audio/brown noise.wav" id="2_vb78o"]
+[ext_resource type="AudioStream" uid="uid://c046mcbgrimc" path="res://audio/05 Among The Wildflowers.mp3" id="2_t6pro"]
 
 [node name="Visualizer" type="Node2D"]
 position = Vector2(960, 540)
@@ -9,7 +9,8 @@ script = ExtResource("1_6vqja")
 rotation_offset = 1.37881
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("2_vb78o")
+unique_name_in_owner = true
+stream = ExtResource("2_t6pro")
 autoplay = true
 
 [connection signal="finished" from="AudioStreamPlayer" to="." method="_on_audio_stream_player_finished"]

@@ -17,6 +17,13 @@ extends Node2D
 
 @export_range(0.01, 0.5) var animation_speed = 0.1
 
+## Audio playback offset in seconds
+@export var playback_offset: float = 0.0
+
+
+@onready var audio_player = %AudioStreamPlayer
+
+
 var spectrum
 var min_values = []
 var max_values = []
@@ -33,6 +40,7 @@ func _ready():
 	data.fill(0.0)
 	
 	queue_redraw()
+	%AudioStreamPlayer.seek(playback_offset)
 
 
 func _process(delta):
@@ -88,3 +96,10 @@ func _draw():
 
 func _on_audio_stream_player_finished() -> void:
 	get_tree().quit()
+
+
+func _validate_property(property : Dictionary) -> void:
+	if property.name == "playback_offset":
+		property.hint = PROPERTY_HINT_RANGE
+		property.hint_string = "0.0, %f, 0.5, suffix:s" % %AudioStreamPlayer.stream.get_length()
+		print(property.hint_string)
