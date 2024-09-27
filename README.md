@@ -6,7 +6,7 @@ A Godot 4 radial audio visualizer for music video creation. Based on <a href="ht
 
 ## How to Use
 
-Import the project into Godot 4.0 or higher. Open the `visualizer.tscn` scene. Add your .wav or .mp3 file into the AudioStreamPlayer node's stream property. You can set up the visualizer appearance in the inspector of the root `Visualier` node.
+Import the project into Godot 4.0 or higher. Open the `visualizer.tscn` scene. Add your .wav or .mp3 file into the AudioStreamPlayer node's stream property. You can set up the visualizer appearance in the inspector of the root `Visualizer` node.
 
 ![Audio Visualizer screenshot](images/visualizer_inspector.png)
 
