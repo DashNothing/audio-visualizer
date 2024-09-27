@@ -7,6 +7,7 @@
 position = Vector2(960, 540)
 script = ExtResource("1_6vqja")
 rotation_offset = 1.37881
+playback_offset = 202.72
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
